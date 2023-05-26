@@ -1,0 +1,10 @@
+stackoverflow.com
+joereddington.com
+en.wikipedia.org
+unix.stackexchange.com
+mathoverflow.com
+security.stackexchange.com
+vi.stackexchange.com
+www.youtube.com
+xkcd.com
+bbc.co.uk
