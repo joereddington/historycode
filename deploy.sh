@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/joe/git/export-history/
+cd /home/joe/git/historycode/
 ./localdeploy.sh
 cd _site
 git commit -a -m "Update"
