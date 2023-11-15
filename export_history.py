@@ -37,48 +37,99 @@ def get_domain(url):
 
 
 
+from datetime import datetime
+
+
+
+def is_domain_whitelisted(domain, whitelist_domains, match_datetime):
+    """
+    Check if a domain is whitelisted based on the match date and the date in the file (if present).
+
+    Args:
+        domain (str): The domain to check.
+        whitelist_domains (dict): A dictionary of whitelisted domains and their associated dates.
+        match_date (str): The date from the match (e.g., '2023-01-01').
+
+    Returns:
+        bool: True if the domain is whitelisted, False otherwise.
+    """
+    remove_path = True
+
+    domain_without_comma_date = domain.split(',')[0].strip()
+
+    if domain_without_comma_date in whitelist_domains:
+        date_in_file = whitelist_domains[domain_without_comma_date]
+        if date_in_file:
+            if match_datetime >= date_in_file:
+                remove_path = False
+        else:
+            remove_path = False
+            
+    return remove_path
 
 
 
 
-def domain_filter(matches,use_blacklist=False,html=True):
-    return_me=[]
-    whitelist=open('lists/whitelist.txt').read().split("\n")
-    blacklist=open('lists/blacklist.txt').read().split("\n")
+def domain_filter(matches, use_blacklist=False, html=True):
+    return_me = []
+    whitelist_lines = open('lists/whitelist.txt').readlines()
+
+    # Create a dictionary to store whitelisted domains and their associated dates (if present)
+    whitelist_domains = {}
+
+    for line in whitelist_lines:
+        # Split each line by comma (if present) and take the first part as the domain
+        parts = line.split(',')
+        domain = parts[0].strip()
+
+        # Check if there is a date (optional)
+        date = None
+        if len(parts) > 1:
+            date = parts[1].strip()
+            date = datetime.strptime(date, "%Y-%m-%d")
+     
+
+        whitelist_domains[domain] = date
+
+    blacklist = open('lists/blacklist.txt').read().split("\n")
+
     for row in matches:
-        address_shown=""
-        domain=get_domain(row[1])
-        remove_path=True
+        match_datetime = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+        address_shown = ""
+        domain = get_domain(row[1])
+        remove_path = True
+
         if use_blacklist:
-           if domain not in blacklist:
-                remove_path=False 
+            if domain not in blacklist:
+                remove_path = False
         else:
-            if domain in whitelist: 
-                remove_path=False 
-        
-
+            remove_path = is_domain_whitelisted(domain, whitelist_domains,match_datetime)
         if remove_path:
-            return_me.append((row[0],domain))
+            return_me.append((row[0], domain))
         else:
-                ascii_title=""
-                if row[2]:
-                    ascii_title = row[2]
-                if html:
-                    return_me.append((row[0],"<a href=\"{}\">{}</a>".format(row[1],ascii_title)))
-                else:
-                    return_me.append((row[0],"{} {}".format(row[1],ascii_title)))
-                    
+            ascii_title = ""
+            if row[2]:
+                ascii_title = row[2]
+            if html:
+                return_me.append((row[0], "<a href=\"{}\">{}</a>".format(row[1], ascii_title)))
+            else:
+                return_me.append((row[0], "{} {}".format(row[1], ascii_title)))
 
-    return_me2=[]
-    last_row=["a","b"]
-    for row in return_me: 
+
+    #The below code removes the other pages that appears that the same datestamp
+    return_me2 = []
+    last_row = ["a", "b"]
+    for row in return_me:
         if row[0][:16] == last_row[0][:16]:
             if row[1] == last_row[1]:
-                continue 
+                continue
         return_me2.append(row)
-        last_row=row
-        
+        last_row = row
+
     return return_me2
+
+
+
 
 
 def most_Common(lst): #from https://stackoverflow.com/a/20872750/170243

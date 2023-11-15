@@ -5,6 +5,8 @@ unix.stackexchange.com
 mathoverflow.com
 security.stackexchange.com
 vi.stackexchange.com
+tex.stackexchange.com
 www.youtube.com
 xkcd.com
-bbc.co.uk
+www.bbc.co.uk, 2023-11-10
+
