@@ -110,3 +110,4 @@ _site/*
 _site*
 databases/* 
 social/*
+bbc.csv
