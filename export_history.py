@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import urllib.parse
+import csv
 import time
 import sqlite3
 import datetime
 import urllib.request, urllib.parse, urllib.error
-from collections import Counter
-
+from collections import Counter, defaultdict
+from datetime import datetime, timedelta
+import pytz
 
 def get_history_from_database(filename, browser="firefox", start=0,end=0):
     cursor = sqlite3.connect(filename).cursor()
@@ -25,19 +27,11 @@ def get_history_from_database(filename, browser="firefox", start=0,end=0):
 def filter_by_date(matches, text): 
     return [x for x in matches if str(text) in str(x[0])]
 
-
-
-
-
-
 def get_domain(url):
      if url.startswith("file://"):
         return "Local file"
      return urllib.parse.urlparse(url)[1]   
 
-
-
-from datetime import datetime
 
 
 
@@ -230,7 +224,79 @@ def bbc_analysis(data):
                 count=0 # Reset the day's count 
             last_vis=vis
 
+def get_daily_access_times(data, timezone='Europe/London'):
+    # Initialize a dictionary to store the first and last access times for each day
+    daily_access = defaultdict(lambda: {'first': None, 'last': None})
+    
+    # Get the time zone object
+    tz = pytz.timezone(timezone)
+    
+    for row in data:
+        # Skip entries based on the given conditions
+        if "accounts.google.com/v3" in row[1]:
+            continue
+        if "calendar" in row[1]:
+            continue
+        if "zoom" in row[1]:
+            continue
+        
+        # Parse the timestamp and convert to the specified time zone
+        utc_time = datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S')
+        utc_time = pytz.utc.localize(utc_time)
+        local_time = utc_time.astimezone(tz)
+        
+        # Extract the date and time parts from the local time
+        date_str = local_time.strftime('%Y-%m-%d')
+        time_str = local_time.strftime('%H:%M:%S')
+        
+        # Update the first and last access times for the date
+        if daily_access[date_str]['first'] is None:
+            daily_access[date_str]['first'] = time_str
+        daily_access[date_str]['last'] = time_str
+    
+    return daily_access
+
+
+def calculate_total_time(first_time_str, last_time_str, time_format="%H:%M:%S"):
+    """
+    Calculate the total time between two time strings.
+
+    Args:
+        first_time_str (str): The first time string.
+        last_time_str (str): The last time string.
+        time_format (str): The format of the time strings. Default is "%H:%M:%S".
+
+    Returns:
+        str: The total time between the two time strings as a string.
+    """
+    try:
+        first_time = datetime.strptime(first_time_str, time_format)
+        last_time = datetime.strptime(last_time_str, time_format)
+        
+        # Calculate the total time
+        total_time = last_time - first_time
+        
+        # Handle the case where the last time is before the first time (crossing midnight)
+        if total_time < timedelta(0):
+            total_time += timedelta(days=1)
+        
+        # Convert the total time to string
+        total_time_str = str(total_time)
+        return total_time_str
+    except ValueError as e:
+        return f"Error: {e}"
 
 if __name__=="__main__":
     bbc_analysis(get_data_from_database())
     output_data(get_data_from_database())
+    daily_access_times = get_daily_access_times(get_data_from_database())
+    with open("_site/daily_access_times.csv", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Date", "First Access", "Last Access", "Total Time Online"])
+        
+        for date, times in daily_access_times.items():
+            first_access_str = times['first']
+            last_access_str = times['last']
+            writer.writerow([date, first_access_str, last_access_str, calculate_total_time(first_access_str,last_access_str)])
+
+
