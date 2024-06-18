@@ -56,5 +56,5 @@ def plot_internet_usage(file_path, days_back=14):
     plt.show()
 
 # Example usage
-plot_internet_usage('_site/daily_access_times.csv', days_back=14)
+plot_internet_usage('site/daily_access_times.csv', days_back=14)
 

@@ -106,8 +106,6 @@ venv.bak/
 
 
 # Project specific 
-_site/*
-_site*
 databases/* 
 social/*
 bbc.csv

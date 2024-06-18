@@ -128,22 +128,16 @@ def domain_filter(matches, use_blacklist=False, html=True):
 
 def most_Common(lst): #from https://stackoverflow.com/a/20872750/170243
     data = Counter(lst)
-    return_me="<h3> Most common sites</h3>\nWith number of accesses/minutes in parentheses<ol>"
+    return_me="""<h3> Most common sites</h3>
+With number of accesses/minutes in parentheses
+
+<ol>"""
     for row in data.most_common()[:30]:
         return_me+="<li>{} ({})</li>\n".format(row[0],row[1])
-    return return_me+"</ol>"
+    return return_me+"""
 
-def recent_domains(data):
-    dic_domains={}
-    for row in data:
-        time=convert_to_time_zone(row[0])
-        timestamp=time.strftime("%d/%m/%y %H:%M")
-        domain=urllib.parse.urlparse(row[1])[1].replace("www.","").replace("mobile.","").replace("m.","")
-        dic_domains[domain]=timestamp
-    return_me="<h2>How long since?</h2>"
-    for key in ['bbc.co.uk','twitter.com','facebook.com','mail.google.com']:
-        return_me+="{}: {}<br>\n".format(key,dic_domains[key])
-    return return_me
+</ol>"""
+
 
 
 def convert_to_time_zone(time,zone='Europe/London'): 
@@ -159,7 +153,7 @@ def get_data_from_database():
     return sorted(get_history_from_database('databases/firefox.sqlite','firefox'))
 
 def output_data(data):
-    with open("_site/history.html","w") as html_file:
+    with open("site/history.html","w") as html_file:
         writelist(data, html_file)
 
 class Visit:
@@ -176,9 +170,9 @@ class Visit:
 
     def html_out(self,last_vis):
         if (last_vis.location == self.location):
-            return "<li class='same'> "+self.time_string+" "+self.location+"\n"
+            return "<li class='same'> "+self.time_string+" "+self.location+"</li>\n"
         else:
-            return "<li> "+self.time_string+" "+self.location+"\n"
+            return "<li> "+self.time_string+" "+self.location+"</li>\n"
 
 
     def __str__(self):
@@ -192,7 +186,7 @@ class Visit:
 def writelist(data,html_file,name=""):
             common_domains=[row[1] for row in domain_filter(data)]
             html_file.write(most_Common(common_domains))
-            html_file.write("<H2> Sites and times</H2>")
+            html_file.write("<H2> Sites and times</H2>\n\n")
             data=domain_filter(data)
             last_vis=Visit(data[0])
             html_file.write("<ul>")
@@ -201,9 +195,19 @@ def writelist(data,html_file,name=""):
                 delta=last_vis.seconds-vis.seconds
 
                 if last_vis.date_string not in vis.date_string:
-                    html_file.write("</ul><H3>{}, {}</H3><br><ul>".format(vis.weekday,vis.date_string))
+                    html_file.write("""</ul>
+
+<H3>{}, {}</H3>
+
+<br>
+
+<ul>""".format(vis.weekday,vis.date_string))
                 if delta>1800:
-                    html_file.write("</ul><br><ul>")
+                    html_file.write("""</ul>
+
+<br>
+
+<ul>""")
                 to_write=vis.html_out(last_vis)
                 html_file.write(to_write)
                 last_vis=vis
@@ -290,7 +294,7 @@ if __name__=="__main__":
     bbc_analysis(get_data_from_database())
     output_data(get_data_from_database())
     daily_access_times = get_daily_access_times(get_data_from_database())
-    with open("_site/daily_access_times.csv", "w", newline='') as f:
+    with open("site/daily_access_times.csv", "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(["Date", "First Access", "Last Access", "Total Time Online"])
         
