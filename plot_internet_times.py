@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 def time_to_float(t):
     return t.hour + t.minute / 60 + t.second / 3600
 
-def plot_internet_usage(file_path, days_back=14):
+def plot_internet_usage(file_path, days_back=14, output_path='internet_usage.png'):
     # Load the data from the CSV file
     data = pd.read_csv(file_path)
     
@@ -51,10 +51,11 @@ def plot_internet_usage(file_path, days_back=14):
     plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d'))
     plt.xticks(rotation=45)
     
-    # Show the plot
+    # Save the plot as a PNG file
     plt.tight_layout()
-    plt.show()
+    plt.savefig(output_path)
+    plt.close()
 
 # Example usage
-plot_internet_usage('site/daily_access_times.csv', days_back=14)
+plot_internet_usage('site/daily_access_times.csv', days_back=14, output_path='site/slots.png')
 
