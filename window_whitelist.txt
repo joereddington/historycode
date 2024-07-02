@@ -1,0 +1,15 @@
+accounts.google.com/v3
+calendar
+zoom
+drive.google
+docs.google # Need both of these for proper editing. 
+github
+openai
+chatgpt #Need both of these apparently
+intuit
+whatsapp
+
+
+# Our own sites
+whitewaterwriters.com
+joereddington.com

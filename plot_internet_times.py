@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 def time_to_float(t):
     return t.hour + t.minute / 60 + t.second / 3600
 
-def plot_internet_usage(file_path, days_back=14, output_path='internet_usage.png'):
+def plot_internet_usage(file_path, days_back=14, output_path='site/slots.png'):
     # Load the data from the CSV file
     data = pd.read_csv(file_path)
     
@@ -47,8 +47,13 @@ def plot_internet_usage(file_path, days_back=14, output_path='internet_usage.png
     plt.gca().yaxis.set_major_locator(plt.MultipleLocator(1))
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{int(x):02d}:00'))
     
-    # Rotate x-axis labels for better readability
-    plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d'))
+    # Add light grid lines for 6 AM, 12 PM, and 6 PM
+    plt.axhline(6, color='lightgrey', linestyle='--', linewidth=0.5)
+    plt.axhline(12, color='lightgrey', linestyle='--', linewidth=0.5)
+    plt.axhline(18, color='lightgrey', linestyle='--', linewidth=0.5)
+    
+    # Rotate x-axis labels for better readability and show day of the week
+    plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%a'))
     plt.xticks(rotation=45)
     
     # Save the plot as a PNG file

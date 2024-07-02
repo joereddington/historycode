@@ -228,20 +228,31 @@ def bbc_analysis(data):
                 count=0 # Reset the day's count 
             last_vis=vis
 
-def get_daily_access_times(data, timezone='Europe/London'):
+
+
+def get_window_whitelist(file_path='window_whitelist.txt'):
+    # This version allows comments
+    with open(file_path, 'r') as file:
+        whitelist = []
+        for line in file:
+            stripped_line = line.split('#', 1)[0].strip()
+            if stripped_line:
+                whitelist.append(stripped_line)
+        return whitelist
+
+def get_daily_access_times(data, timezone='Europe/London', whitelist_file='window_whitelist.txt'):
     # Initialize a dictionary to store the first and last access times for each day
     daily_access = defaultdict(lambda: {'first': None, 'last': None})
     
     # Get the time zone object
     tz = pytz.timezone(timezone)
     
+    # Read the whitelist from the file
+    whitelist = get_window_whitelist(whitelist_file)
+    
     for row in data:
-        # Skip entries based on the given conditions
-        if "accounts.google.com/v3" in row[1]:
-            continue
-        if "calendar" in row[1]:
-            continue
-        if "zoom" in row[1]:
+        # Skip entries based on the whitelist
+        if any(skip_string in row[1] for skip_string in whitelist):
             continue
         
         # Parse the timestamp and convert to the specified time zone
@@ -256,10 +267,12 @@ def get_daily_access_times(data, timezone='Europe/London'):
         # Update the first and last access times for the date
         if daily_access[date_str]['first'] is None:
             daily_access[date_str]['first'] = time_str
-        daily_access[date_str]['last'] = time_str
-    
-    return daily_access
+            daily_access[date_str]['firstsite'] = row[1] #for debugging
 
+        daily_access[date_str]['last'] = time_str
+        daily_access[date_str]['lastsite'] = row[1] #for debugging
+    
+    return daily_access #this is a dictionary with dates as keys
 
 def calculate_total_time(first_time_str, last_time_str, time_format="%H:%M:%S"):
     """
