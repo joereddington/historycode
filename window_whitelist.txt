@@ -5,9 +5,11 @@ drive.google
 docs.google # Need both of these for proper editing. 
 github
 openai
+claude
 chatgpt #Need both of these apparently
 intuit
 whatsapp
+0.0.0 #locally running projects
 
 
 # Our own sites
