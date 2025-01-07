@@ -7,9 +7,12 @@ github
 openai
 claude
 chatgpt #Need both of these apparently
+file://
 intuit
+moodle #for marking
 whatsapp
 0.0.0 #locally running projects
+sharepoint
 
 
 # Our own sites

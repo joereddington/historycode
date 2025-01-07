@@ -314,6 +314,7 @@ if __name__=="__main__":
         for date, times in daily_access_times.items():
             first_access_str = times['first']
             last_access_str = times['last']
-            writer.writerow([date, first_access_str, last_access_str, calculate_total_time(first_access_str,last_access_str)])
 
+#Debug only            writer.writerow([date, times['firstsite'], first_access_str, last_access_str, calculate_total_time(first_access_str,last_access_str)])
+            writer.writerow([date, first_access_str, last_access_str, calculate_total_time(first_access_str,last_access_str)])
 
