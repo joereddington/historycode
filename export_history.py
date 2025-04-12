@@ -213,20 +213,6 @@ def writelist(data,html_file,name=""):
                 last_vis=vis
             html_file.write("</ul>")
 
-def bbc_analysis(data): 
-    last_vis=Visit(data[0])
-    count=0
-    data=[x for x in data if "bbc" in x[1]] # Just the bbc ones
-    with open("bbc.csv","w") as outfile:
-        for row in reversed(data):
-            vis=Visit(row)
-            delta=last_vis.seconds-vis.seconds
-            if delta>30:
-                count+=1
-            if last_vis.date_string not in vis.date_string: #If it's a new day 
-                outfile.write("{}, {}\n".format(count,vis.date_string))
-                count=0 # Reset the day's count 
-            last_vis=vis
 
 
 
@@ -304,7 +290,6 @@ def calculate_total_time(first_time_str, last_time_str, time_format="%H:%M:%S"):
         return f"Error: {e}"
 
 if __name__=="__main__":
-    bbc_analysis(get_data_from_database())
     output_data(get_data_from_database())
     daily_access_times = get_daily_access_times(get_data_from_database())
     with open("site/daily_access_times.csv", "w", newline='') as f:
