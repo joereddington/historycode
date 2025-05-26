@@ -23,7 +23,6 @@ def get_history_from_database(filename, browser="firefox", start=0,end=0):
         raise ValueError("Only supports 'firefox' or 'safari' as the browser argument")
     return cursor.fetchall()
 
-
 def filter_by_date(matches, text): 
     return [x for x in matches if str(text) in str(x[0])]
 
@@ -31,8 +30,6 @@ def get_domain(url):
      if url.startswith("file://"):
         return "Local file"
      return urllib.parse.urlparse(url)[1]   
-
-
 
 
 def is_domain_whitelisted(domain_from_history, whitelist_domains, history_match_datetime):
@@ -47,6 +44,11 @@ def is_domain_whitelisted(domain_from_history, whitelist_domains, history_match_
     Returns:
         bool: True if the domain is whitelisted, False otherwise.
     """
+
+    if isinstance(history_match_datetime, str):
+       history_match_datetime = datetime.strptime(history_match_datetime, "%Y-%m-%d").date()
+
+
     domain_from_history = domain_from_history.split(',')[0].strip()#get rid of the trailing comma
     print(domain_from_history)
 
@@ -55,9 +57,9 @@ def is_domain_whitelisted(domain_from_history, whitelist_domains, history_match_
         date_of_whitelisting = whitelist_domains[domain_from_history]
 #@        print(f"The date of whitelisting is {date_of_whitelisting}")
         if date_of_whitelisting:
-            history_match_date_obj = datetime.strptime(history_match_datetime, "%Y-%m-%d").date()
-            file_date_obj = datetime.strptime(date_of_whitelisting, "%Y-%m-%d").date()
-            if history_match_date_obj >= file_date_obj:
+            if isinstance(date_of_whitelisting, str):
+                  date_of_whitelisting = datetime.strptime(date_of_whitelisting, "%Y-%m-%d").date()
+            if history_match_datetime >= date_of_whitelisting:
 #                print("The history date is after the whitelisting date")
                 return True
             else: 
@@ -74,9 +76,8 @@ def is_domain_whitelisted(domain_from_history, whitelist_domains, history_match_
 
 
 
-def domain_filter(matches, use_blacklist=False, html=True):
-    return_me = []
-    whitelist_lines = open('lists/whitelist.txt').readlines()
+def get_whitelist_domains(filename="lists/whitelist.txt"):
+    whitelist_lines = open(filename).readlines()
 
     # Create a dictionary to store whitelisted domains and their associated dates (if present)
     whitelist_domains = {}
@@ -94,31 +95,15 @@ def domain_filter(matches, use_blacklist=False, html=True):
      
 
         whitelist_domains[domain] = date
+    return whitelist_domains
 
+def domain_filter(matches, use_blacklist=False, html=True):
+    return_me = []
+    whitelist=get_whitelist_domains()
     blacklist = open('lists/blacklist.txt').read().split("\n")
 
     for row in matches:
-        match_datetime = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
-        address_shown = ""
-        domain = get_domain(row[1])
-        remove_path = True
-
-        if use_blacklist:
-            if domain not in blacklist:
-                remove_path = False
-        else:
-            remove_path = is_domain_whitelisted(domain, whitelist_domains,match_datetime)
-        if remove_path:
-            return_me.append((row[0], domain))
-        else:
-            ascii_title = ""
-            if row[2]:
-                ascii_title = row[2]
-            if html:
-                return_me.append((row[0], "<a href=\"{}\">{}</a>".format(row[1], ascii_title)))
-            else:
-                return_me.append((row[0], "{} {}".format(row[1], ascii_title)))
-
+        return_me.append(process_row(row,whitelist, use_blacklist, blacklist,html))
 
     #The below code removes the other pages that appears that the same datestamp
     return_me2 = []
@@ -133,6 +118,29 @@ def domain_filter(matches, use_blacklist=False, html=True):
     return return_me2
 
 
+def process_row(row, whitelist_domains,use_blacklist, blacklist, html):
+        print("Hello")
+        match_datetime = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+        address_shown = ""
+        domain = get_domain(row[1])
+        remove_path = True
+
+        if use_blacklist:
+            if domain not in blacklist:
+                remove_path = False
+        else:
+            whitelisted = is_domain_whitelisted(domain, whitelist_domains,match_datetime)
+            remove_path= not whitelisted
+        if remove_path:
+            return (row[0], domain)
+        else:
+            ascii_title = ""
+            if row[2]:
+                ascii_title = row[2]
+            if html:
+                return (row[0], "<a href=\"{}\">{}</a>".format(row[1], ascii_title))
+            else:
+                return (row[0], "{} {}".format(row[1], ascii_title))
 
 
 

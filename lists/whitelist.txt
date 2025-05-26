@@ -9,4 +9,4 @@ tex.stackexchange.com
 www.youtube.com
 xkcd.com
 www.bbc.co.uk, 2022-11-10
-www.theguardian.com 2025-03-10
+theguardian.com, 2025-05-05

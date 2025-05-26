@@ -30,6 +30,15 @@ class historyTest(TestCase):
         self.assertTrue(export_history.is_domain_whitelisted("example.com", whitelist_domains,"2023-02-02"))
 
 
+    def test_why_is_this_not_working(self):
+        row="('2025-05-26 08:40:50', 'https://www.theguardian.com/business/2025/may/26/taxpayer-loss-natwest-disgraced-ex-boss-pension', 'Taxpayers set for £10bn loss on NatWest as disgraced ex-boss takes £600k-a-year pension | Fred Goodwin | The Guardian', 1748248850912335)"
+        import ast 
+        row=ast.literal_eval(row)
+        print(row)
+        print("XXX")
+        whitelist=export_history.get_whitelist_domains()
+        print(export_history.process_row(row, whitelist,False, {}, True))
+
 
 if __name__=="__main__":
     unittest.main()
