@@ -7,6 +7,32 @@ There is a [blog post](http://joereddington.com/6530/2018/12/12/experimenting-wi
 
 Currently all urls are stripped down to their domain name unless they appear on 'whitelist.txt' 
 
+
+* databases
+The folder where we put the databases from Firefox and Safari 
+
+* lists
+The directory containing various black and whitelists
+
+deploy.sh
+
+
+* entry.py
+* export_history.py
+* history_list.py
+* history_list.sh
+* LICENSE
+
+* localdeploy.sh
+* plot_internet_times.py
+* __pycache__
+* README.md
+* site
+* test_export_history.py
+* venv
+* window_whitelist.txt
+
+
 ## TODO 
 * Put in a proper folder structure 
 * Fix local files bug

@@ -35,31 +35,41 @@ def get_domain(url):
 
 
 
-def is_domain_whitelisted(domain, whitelist_domains, match_datetime):
+def is_domain_whitelisted(domain_from_history, whitelist_domains, history_match_datetime):
     """
     Check if a domain is whitelisted based on the match date and the date in the file (if present).
 
     Args:
         domain (str): The domain to check.
-        whitelist_domains (dict): A dictionary of whitelisted domains and their associated dates.
-        match_date (str): The date from the match (e.g., '2023-01-01').
+        whitelist_domains (dict): A dictionary of whitelisted domains and their associated dates of whitelisting
+        match_date (str): The date in the history we are checking (e.g., '2023-01-01').
 
     Returns:
         bool: True if the domain is whitelisted, False otherwise.
     """
-    remove_path = True
+    domain_from_history = domain_from_history.split(',')[0].strip()#get rid of the trailing comma
+    print(domain_from_history)
 
-    domain_without_comma_date = domain.split(',')[0].strip()
-
-    if domain_without_comma_date in whitelist_domains:
-        date_in_file = whitelist_domains[domain_without_comma_date]
-        if date_in_file:
-            if match_datetime >= date_in_file:
-                remove_path = False
+    if domain_from_history in whitelist_domains:
+#        print(f"The domain from history {domain_from_history} is in the whitelist")
+        date_of_whitelisting = whitelist_domains[domain_from_history]
+#@        print(f"The date of whitelisting is {date_of_whitelisting}")
+        if date_of_whitelisting:
+            history_match_date_obj = datetime.strptime(history_match_datetime, "%Y-%m-%d").date()
+            file_date_obj = datetime.strptime(date_of_whitelisting, "%Y-%m-%d").date()
+            if history_match_date_obj >= file_date_obj:
+#                print("The history date is after the whitelisting date")
+                return True
+            else: 
+                return False
         else:
-            remove_path = False
+            #It is in the white list but there is NO date - so it is automatically whitelisted
+            return True
+    else:
+        #The domain isn't in the whitelist at all
+        return False
             
-    return remove_path
+    return domain_whitelisted
 
 
 
